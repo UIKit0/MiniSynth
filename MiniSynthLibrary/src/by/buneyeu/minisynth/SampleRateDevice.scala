@@ -1,6 +1,8 @@
 package by.buneyeu.minisynth
 
 object SampleRateDevice {
+  type Ms = Double
+  
   val CFreq = 32.703196
   val Semitone = 1.05946309436
 

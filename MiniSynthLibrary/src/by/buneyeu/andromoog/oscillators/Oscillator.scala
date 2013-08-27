@@ -3,22 +3,41 @@ package by.buneyeu.andromoog.oscillators
 import scala.math
 import scala.math.Pi
 import scala.math.sin
+import by.buneyeu.minisynth.SampleRateDevice
 
-class Oscillator(rate: Double) {
+class Oscillator(rate: Int) extends SampleRateDevice(rate) {
   val Tag = getClass.getSimpleName
 
-  val mFrequency: MutableFrequency = new MutableFrequency
+  val mFrequency: MutableFrequency = new MutableFrequency(rate)
   var rads: Double = 0
 
   val twopiRate: Double = 2 * Pi / rate
 
-  def processSamples(buffer: Array[Double], freqHz: Double) = {
-    System.out.println("freqHz = "+freqHz)
+  def processSamples(buffer: Array[Double]) : Array[Double] = {
 //    Log.d(Tag, "process samples " + freqHz)
-    mFrequency.setFinalValue(freqHz)
+    
     doSaw(buffer)
+    buffer
   }
 
+  def processSample() : Double = {
+    doSaw
+  }
+
+  def processSample(value: Double) : Double = {
+    doSaw
+  }
+  def doWave(f: Double => Double) : Double = {
+    rads += twopiRate * mFrequency.nextValue()
+    val v = f(rads)
+    rads %= 2 * Pi
+    v
+  }
+  
+  def doSaw() = doWave(saw)
+
+  type Hz = Double
+  def setFreq = mFrequency.setFinalValue(_: Hz) 
   def setGlide = mFrequency.setGlide(_: Int)
   
   def doWave(buffer: Array[Double], f: Double => Double) = {
@@ -31,7 +50,7 @@ class Oscillator(rate: Double) {
 
   def doSine = doWave(_: Array[Double], sin)
 
-  def doSaw = doWave(_: Array[Double], saw)
+  def doSaw(buffer: Array[Double]) = doWave(buffer, saw)
 
   def saw(rads: Double): Double = {
     val phase = rads % (2 * Pi)

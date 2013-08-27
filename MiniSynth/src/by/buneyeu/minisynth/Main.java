@@ -1,5 +1,7 @@
 package by.buneyeu.minisynth;
 
+import by.buneyeu.minisynth.loudness.LoudnessContour;
+
 
 public class Main {
 	public static void main(String[] args) {
@@ -17,5 +19,10 @@ public class Main {
 				synth.noteOff(note);
 			}
 		}
+		
+//		LoudnessContour.getLoudnessPlot(100, 100, 0.7, 0, 300);
+//		Test.plotFreq(44100, 200, 440, 600, 200);
+		Test.plotOscillator(44100, 440, 10);
+		Test.plotLoudness(100, 100, 0.7, 0, 1000);
 	}
 }

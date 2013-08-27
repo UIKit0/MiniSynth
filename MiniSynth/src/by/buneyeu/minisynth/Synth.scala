@@ -10,21 +10,27 @@ import javax.sound.sampled.LineUnavailableException
 import java.nio.ByteBuffer
 import by.buneyeu.minisynth.loudness.LoudnessContour
 import by.buneyeu.minisynth.NoteListener
+import java.nio.file.Files
+import java.nio.file.FileSystems
+import java.nio.file.StandardOpenOption
+import java.nio.charset.Charset
+import java.io.BufferedWriter
 
 class Synth(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListener {
 
   val oscillator = new Oscillator(sampleRate)
   val minimoogFilter = new MinimoogFilter
-  var loudnessCountur = new LoudnessContour(sampleRate)
+  val loudnessCountur = new LoudnessContour(sampleRate)
 
   var mSoundThread: Thread = null
   var mNote = 1
 
   def noteOn(note: Integer, duration: Ms) = {
-
+	  loudnessCountur.noteOn(note, duration)
+	  
     m_stop = false;
 
-    loudnessCountur.reset(200, 200, 7)
+    loudnessCountur.reset(30, 30, 7)
     mNote = note
 
     if (mSoundThread == null) {
@@ -39,7 +45,9 @@ class Synth(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListe
     }
   }
 
-  def noteOff(note: Integer) = {}
+  def noteOff(note: Integer) = {
+    loudnessCountur.noteOff(note)
+  }
 
   var m_stop = false
 
@@ -65,17 +73,35 @@ class Synth(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListe
     // Make our buffer size match audio system's buffer
     val buf = ByteBuffer.allocate(line.getBufferSize());
 
-    oscillator.setGlide(2000)
-
+    oscillator.setGlide(50)
+        val path = FileSystems.getDefault().getPath(".", "plot1.txt");
+    val writer =  Files.newBufferedWriter( path, Charset.defaultCharset(), 
+                                                  StandardOpenOption.CREATE);
+    var t = 0d
+    var maxt = 1000
     while (!m_stop && !Thread.currentThread.isInterrupted()) {
       val freqHz = SampleRateDevice.NoteToFreq(mNote)
-      oscillator.processSamples(samples, freqHz)
+    		  oscillator.setFreq(freqHz)
+    		  
+    		  def minimoogProcess = minimoogFilter.processSample(_: Double, 1000, 0.7)
+      
+      val processedSamples = samples map oscillator.processSample map loudnessCountur.processSample map minimoogProcess    
+      	/* map 
+      	loudnessCountur.processSample*/
+      	
+//      	processedSamples.foreach(System.out.println)
+//        oscillator.processSamples(samples, freqHz) map loudnessCountur.processSamples(samples)   
+        
 //      minimoogFilter.processSamples(samples, 1000, 0.7)
-      loudnessCountur.processSamples(samples)
-
+//      loudnessCountur.processSamples(samples)
+      if (t <= maxt) {
+      printSamples(writer, processedSamples, t)
+      t += NumSamples * MsInSec / sampleRate
+      }
+      
       buf.clear();
       for (i <- 0 until NumSamples)
-        buf.putShort((Short.MaxValue * samples(i)).toShort)
+        buf.putShort((Short.MaxValue * processedSamples(i)).toShort)
 
       line.write(buf.array(), 0, buf.position());
     }
@@ -84,4 +110,16 @@ class Synth(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListe
     line.close();
   }
 
+  private val MsInSec = 1000
+
+  def printSamples(writer: BufferedWriter, samples: Array[Double], startT: Ms) = {
+    val builder = new StringBuilder()
+    for (i <- 0 until samples.length) {
+      val t = startT + i.toDouble * MsInSec / sampleRate
+      builder ++= t.toString ++= " " ++= samples(i).toString ++= "\n"
+    }
+    val content = builder.toString()
+
+    writer.write(content, 0, content.length)
+  }
 }

@@ -27,7 +27,22 @@ class MinimoogFilter {
     val t2 = 12.f + t * t;
     val r = resIn * (t2 + 6.f * t) / (t2 - 6.f * t);
 
-    def processSample(input: Double): Double = {
+
+    for (i <- 0 until buffer.length) {
+      buffer(i) = processSample(buffer(i), cutoffIn, resIn)
+    }
+
+  }
+    def processSample(input: Double, cutoffIn: Hz, resIn: Double): Double = {
+     
+    val f = 2 * cutoffIn / rate; //[0 - 1]
+    val p = f * (1.8f - 0.8f * f);
+    val k = p + p - 1.f;
+
+    val t = (1.f - p) * 1.386249f;
+    val t2 = 12.f + t * t;
+    val r = resIn * (t2 + 6.f * t) / (t2 - 6.f * t);
+
       // process input
       val x = input - r * y4;
 
@@ -43,10 +58,4 @@ class MinimoogFilter {
       oldx = x; oldy1 = y1; oldy2 = y2; oldy3 = y3;
       y4
     }
-    for (i <- 0 until buffer.length) {
-      buffer(i) = processSample(buffer(i))
-    }
-
-  }
-
 }
