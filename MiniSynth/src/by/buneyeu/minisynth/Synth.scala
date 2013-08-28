@@ -1,7 +1,5 @@
 package by.buneyeu.minisynth
 
-import by.buneyeu.andromoog.oscillators.Oscillator
-import by.buneyeu.minisynth.MinimoogFilter
 import javax.sound.sampled.SourceDataLine
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.DataLine
@@ -9,24 +7,25 @@ import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.LineUnavailableException
 import java.nio.ByteBuffer
 import by.buneyeu.minisynth.loudness.LoudnessContour
-import by.buneyeu.minisynth.NoteListener
 import java.nio.file.Files
 import java.nio.file.FileSystems
 import java.nio.file.StandardOpenOption
 import java.nio.charset.Charset
 import java.io.BufferedWriter
+import by.buneyeu.minisynth.oscillators.Oscillator
 
 class Synth(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListener {
 
   val oscillator = new Oscillator(sampleRate)
-  val minimoogFilter = new MinimoogFilter
+  val minimoogFilter = new MinimoogFilter(sampleRate, 1000, 1)
+  
   val loudnessCountur = new LoudnessContour(sampleRate)
 
   var mSoundThread: Thread = null
   var mNote = 1
 
-  def noteOn(note: Integer, duration: Ms) = {
-	  loudnessCountur.noteOn(note, duration)
+  def noteOn(note: Int) = {
+    loudnessCountur.noteOn(note)
 	  
     m_stop = false;
 
@@ -45,7 +44,7 @@ class Synth(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListe
     }
   }
 
-  def noteOff(note: Integer) = {
+  def noteOff(note: Int) = {
     loudnessCountur.noteOff(note)
   }
 
@@ -82,10 +81,8 @@ class Synth(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListe
     while (!m_stop && !Thread.currentThread.isInterrupted()) {
       val freqHz = SampleRateDevice.NoteToFreq(mNote)
     		  oscillator.setFreq(freqHz)
-    		  
-    		  def minimoogProcess = minimoogFilter.processSample(_: Double, 1000, 0.7)
-      
-      val processedSamples = samples map oscillator.processSample map loudnessCountur.processSample map minimoogProcess    
+    	
+      val processedSamples = samples map oscillator.processSample map loudnessCountur.processSample map minimoogFilter.processSample    
       	/* map 
       	loudnessCountur.processSample*/
       	
@@ -109,8 +106,6 @@ class Synth(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListe
     line.drain();
     line.close();
   }
-
-  private val MsInSec = 1000
 
   def printSamples(writer: BufferedWriter, samples: Array[Double], startT: Ms) = {
     val builder = new StringBuilder()

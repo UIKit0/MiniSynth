@@ -2,60 +2,48 @@ package by.buneyeu.minisynth
 
 import scala.math._
 
-class MinimoogFilter {
+class MinimoogFilter(sampleRate: Int, var cutOff: Double, var res: Double) extends SampleRateDevice(sampleRate) with SampleProcessor {
   val Tag = getClass.getSimpleName
 
-  val rate = 44100.0
-  val nyquist = rate / 2
-
-  type Hz = Double
+  val nyquist = sampleRate / 2
 
   val y = Array[Double](0, 0, 0, 0)
   val oldy = Array[Double](0, 0, 0)
 
-    var y1, y2, y3, y4, oldy1, oldy2, oldy3 = 0d
-    var oldx = 0d
+  var y1, y2, y3, y4, oldy1, oldy2, oldy3 = 0d
+  var oldx = 0d
+
+  def setCutOff = cutOff = _: Hz
+  def setRes = res = _: Double
+  
+  //TODO optimize defs to vars
+  private def f = 2 * cutOff  / sampleRate //[0 - 1]
+  private def p = f * (1.8f - 0.8f * f)
+  private def k = p + p - 1.f
+  
+  private def t = (1.f - p) * 1.386249f
+  private def t2 = 12.f + t * t
+  private def r = res * (t2 + 6.f * t) / (t2 - 6.f * t)
+
+  
+  override def processSample(input: Double) : Double = {
+    // process input
+    val x = input - r * y4
+
+    //Four cascaded onepole filters (bilinear transform)
+    y(0) = x * p + oldx * p - k * y(0)
+    y(1) = y(0) * p + oldy1 * p - k * y(1)
+    y(2) = y(1) * p + oldy2 * p - k * y(2)
+    y(3) = y(2) * p + oldy3 * p - k * y(3)
+
+    //Clipper band limited sigmoid
+    y(3) -= pow(y(3), 3) / 6.f
+
+    oldx = x
+    oldy1 = y1 
+    oldy2 = y2 
+    oldy3 = y3
     
-  def processSamples(buffer: Array[Double], cutoffIn: Hz, resIn: Double) = {
-    //Init
-
-    val f = 2 * cutoffIn / rate; //[0 - 1]
-    val p = f * (1.8f - 0.8f * f);
-    val k = p + p - 1.f;
-
-    val t = (1.f - p) * 1.386249f;
-    val t2 = 12.f + t * t;
-    val r = resIn * (t2 + 6.f * t) / (t2 - 6.f * t);
-
-
-    for (i <- 0 until buffer.length) {
-      buffer(i) = processSample(buffer(i), cutoffIn, resIn)
-    }
-
+    y4
   }
-    def processSample(input: Double, cutoffIn: Hz, resIn: Double): Double = {
-     
-    val f = 2 * cutoffIn / rate; //[0 - 1]
-    val p = f * (1.8f - 0.8f * f);
-    val k = p + p - 1.f;
-
-    val t = (1.f - p) * 1.386249f;
-    val t2 = 12.f + t * t;
-    val r = resIn * (t2 + 6.f * t) / (t2 - 6.f * t);
-
-      // process input
-      val x = input - r * y4;
-
-      //Four cascaded onepole filters (bilinear transform)
-      y1 = x * p + oldx * p - k * y1;
-      y2 = y1 * p + oldy1 * p - k * y2;
-      y3 = y2 * p + oldy2 * p - k * y3;
-      y4 = y3 * p + oldy3 * p - k * y4;
-
-      //Clipper band limited sigmoid
-      y4 -= (y4 * y4 * y4) / 6.f;
-
-      oldx = x; oldy1 = y1; oldy2 = y2; oldy3 = y3;
-      y4
-    }
 }

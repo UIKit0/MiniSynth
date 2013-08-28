@@ -9,9 +9,6 @@ import android.media.AudioTrack
 import android.media.AudioManager
 import android.media.AudioFormat
 import scala.util.Random
-import by.buneyeu.andromoog.oscillators.Oscillator
-import by.buneyeu.minisynth.loudness.LoudnessContour
-import by.buneyeu.minisynth.MinimoogFilter
 
 class MainActivity extends Activity {
   val TAG = getClass.getSimpleName
@@ -46,10 +43,10 @@ class MainActivity extends Activity {
 //    data
   }
   
-  val minimoogFilter = new MinimoogFilter
-  var loudnessCountur = new LoudnessContour(44100)
-  
-  val oscillator = new Oscillator(sampleRate)
+//  val minimoogFilter = new MinimoogFilter
+//  var loudnessCountur = new LoudnessContour(44100)
+//  
+//  val oscillator = new Oscillator(sampleRate)
   var mNote = 1
 
   def getGenerator(note: Int) = {
@@ -59,14 +56,14 @@ class MainActivity extends Activity {
     val samples = new Array[Double](mNumSamples)
     val data = new Array[Byte](mNumSamples * 2)
     
-    oscillator.setGlide(3000)
+//    oscillator.setGlide(3000)
           
     while (!m_stop && !Thread.currentThread.isInterrupted()) {
       val freqHz = C_FREQ * Math.pow(SEMITONE, mNote)
-      oscillator.processSamples(samples, freqHz)
-//      lowPassFilter.processSamples(samples, 150, 440, FilterTypeLowPass, FilterSlope24)
-      minimoogFilter.processSamples(samples, 1000, 0.7)
-      loudnessCountur.processSamples(samples)
+//      oscillator.processSamples(samples, freqHz)
+////      lowPassFilter.processSamples(samples, 150, 440, FilterTypeLowPass, FilterSlope24)
+//      minimoogFilter.processSamples(samples, 1000, 0.7)
+//      loudnessCountur.processSamples(samples)
       valuesToSamples(samples, data)
 
       mAudioTrack.write(data, 0, data.length)
@@ -91,7 +88,7 @@ class MainActivity extends Activity {
       mAudioTrack.play();
       mNote = note
       
-      loudnessCountur.reset(500,500,5)
+//      loudnessCountur.reset(500,500,5)
       
       if (mSoundThread == null) {
 

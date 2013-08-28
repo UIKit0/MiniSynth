@@ -10,7 +10,7 @@ public class Main {
 		Synth synth = new Synth(44100);
 		for (int note : notes) {
 			System.out.println("synth.noteOn("+note+", 100);");
-			synth.noteOn(note, 100);
+			synth.noteOn(note);
 			try {
 				Thread.sleep(200);
 			} catch (InterruptedException e) {
@@ -22,7 +22,7 @@ public class Main {
 		
 //		LoudnessContour.getLoudnessPlot(100, 100, 0.7, 0, 300);
 //		Test.plotFreq(44100, 200, 440, 600, 200);
-		Test.plotOscillator(44100, 440, 10);
-		Test.plotLoudness(100, 100, 0.7, 0, 1000);
+//		Test.plotOscillator(44100, 440, 10);
+		Test.plotLoudness(100, 100, 0.7);
 	}
 }

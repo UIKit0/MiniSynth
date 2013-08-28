@@ -13,9 +13,14 @@ object SampleRateDevice {
     NoteToFreq(i) = NoteToFreq(i - 1) * Semitone
 }
 
-class SampleRateDevice(sampleRate: Int) {
+abstract class SampleRateDevice(sampleRate: Int) {
   SampleRateDevice
 
   val NumSamples = sampleRate / 8 /* 1/8 second buffer */
 
+  type Ms = Double
+  type Hz = Double
+  type HzPerMs = Double
+  
+  val MsInSec = 1000d
 }

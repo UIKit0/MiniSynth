@@ -4,10 +4,10 @@ import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.charset.Charset
 import java.nio.file.StandardOpenOption
-import by.buneyeu.andromoog.oscillators.MutableFrequency
 import scala.collection.mutable.ListBuffer
-import by.buneyeu.andromoog.oscillators.Oscillator
+import by.buneyeu.minisynth.oscillators.MutableFrequency
 import by.buneyeu.minisynth.loudness.LoudnessContour
+import by.buneyeu.minisynth.oscillators.Oscillator
 
 object Test {
 
@@ -79,19 +79,44 @@ object Test {
   } 
   
   
-  def plotLoudness(attack: Ms, decay: Ms, normalizedSustain: Double, start: Ms, end: Ms) {
-    val inc: Ms = 0.1
-    val steps: Int = ((end - start) / inc).toInt
+  def plotLoudness(attack: Ms, decay: Ms, normalizedSustain: Double) {
+    val sampleRate = 44100
+    val inc: Ms = MsInSec.toDouble / sampleRate
+    val timeToPlot : Ms = 1000
+    val steps: Int = (timeToPlot / inc).toInt
+
     val loudnesses = new Array[Double](steps)
-    val valuesToPlot: Array[(Double, Double)] = new Array[(Double, Double)](steps)
-    for (i <- 0 until steps; 
-    val t = start + inc * i) {
-      
-      loudnesses(i) = LoudnessContour.getLoudness(t, attack, decay, normalizedSustain)
-      
+    val valuesToPlot = new Array[(Double, Double)](steps)
+    
+    val countour = new LoudnessContour(sampleRate)
+    countour.reset(100, 100, 7)
+
+    def thread[F](f: => F) = (new Thread(new Runnable() { def run() { f } })).start
+
+    thread({
+      countour.noteOn(1)
+      Thread.sleep(250)
+      countour.noteOff(1)
+      Thread.sleep(30)
+      countour.noteOn(1)
+      Thread.sleep(250)
+      countour.noteOff(1)
+      Thread.sleep(30)
+      countour.noteOn(1)
+      Thread.sleep(250)
+      countour.noteOff(1)
+      System.out.println("end");
+    })
+
+    for (
+      i <- 0 until steps;
+      t = inc * i
+    ) {
+      loudnesses(i) = countour.processSample(1)
       valuesToPlot(i) = (t, loudnesses(i))
     }
-    
+    System.out.println("end1");
     plot("loudness.txt", valuesToPlot)
+    System.out.println("end2");
   }
 }

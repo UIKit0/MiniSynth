@@ -2,10 +2,8 @@ package by.buneyeu.minisynth
 
 trait NoteListener {
 
-  type Ms = Double
-  
-  def noteOn(note: Integer, duration: Ms)
+  def noteOn(note: Int)
 
-  def noteOff(note: Integer)
+  def noteOff(note: Int)
 
 }
