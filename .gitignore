@@ -8,3 +8,17 @@
 
 *proguard_cache
 *.cache
+
+MiniSynthLibrary/.cache
+
+AndroMoog/.cache
+
+MiniSynth/.cache
+
+*.conf
+
+*.data
+
+*.conf
+
+*.jar
