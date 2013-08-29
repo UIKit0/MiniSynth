@@ -10,7 +10,6 @@ class MinimoogFilter(sampleRate: Int, var cutOff: Double, var res: Double) exten
   val y = Array[Double](0, 0, 0, 0)
   val oldy = Array[Double](0, 0, 0)
 
-  var y1, y2, y3, y4, oldy1, oldy2, oldy3 = 0d
   var oldx = 0d
 
   def setCutOff = cutOff = _: Hz
@@ -28,22 +27,22 @@ class MinimoogFilter(sampleRate: Int, var cutOff: Double, var res: Double) exten
   
   override def processSample(input: Double) : Double = {
     // process input
-    val x = input - r * y4
+    val x = input - r * y(3)
 
     //Four cascaded onepole filters (bilinear transform)
     y(0) = x * p + oldx * p - k * y(0)
-    y(1) = y(0) * p + oldy1 * p - k * y(1)
-    y(2) = y(1) * p + oldy2 * p - k * y(2)
-    y(3) = y(2) * p + oldy3 * p - k * y(3)
+    y(1) = y(0) * p + oldy(0) * p - k * y(1)
+    y(2) = y(1) * p + oldy(1) * p - k * y(2)
+    y(3) = y(2) * p + oldy(2) * p - k * y(3)
 
     //Clipper band limited sigmoid
     y(3) -= pow(y(3), 3) / 6.f
 
     oldx = x
-    oldy1 = y1 
-    oldy2 = y2 
-    oldy3 = y3
+    oldy(0) = y(0)
+    oldy(1) = y(1)
+    oldy(2) = y(2)
     
-    y4
+    y(3)
   }
 }
