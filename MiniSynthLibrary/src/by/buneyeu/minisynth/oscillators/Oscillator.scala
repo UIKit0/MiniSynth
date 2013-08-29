@@ -6,7 +6,7 @@ import scala.math.sin
 import by.buneyeu.minisynth.SampleRateDevice
 import by.buneyeu.minisynth.SampleProcessor
 
-class Oscillator(rate: Int) extends SampleRateDevice(rate) {
+class Oscillator(rate: Int) extends SampleRateDevice(rate) with SampleProcessor {
   val Tag = getClass.getSimpleName
 
   val mFrequency: MutableFrequency = new MutableFrequency(rate)
