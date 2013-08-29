@@ -1,4 +1,10 @@
 
+*.metadata
 *.class
 
 *.prefs
+
+*.txt
+
+*proguard_cache
+*.cache

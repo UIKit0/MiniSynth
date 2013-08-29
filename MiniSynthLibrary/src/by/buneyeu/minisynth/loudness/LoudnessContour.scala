@@ -8,13 +8,14 @@ object LoudnessContour {
   val Tag = getClass getSimpleName
 }
 
+object State extends Enumeration {
+  type State = Value
+  val Attack, Decay, Sustain, Release = Value
+}
+
 class LoudnessContour(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListener with SampleProcessor {
   LoudnessContour
 
-  object State extends Enumeration {
-    type State = Value
-    val Attack, Decay, Sustain, Release = Value
-  }
   import State._
     
   var state = Attack
@@ -35,23 +36,21 @@ class LoudnessContour(sampleRate: Int) extends SampleRateDevice(sampleRate) with
 
   var lastLoudness = 0d
 
-  def noteOn(note: Int) = {
+  def noteOn(note: Int) = this.synchronized {
     updateStateTo(Attack)
     tFromLastState = lastLoudness * attack
-    System.out.println("tFromLastState ==" + tFromLastState)
   }
 
-  def noteOff(note: Int) = {
+  def noteOff(note: Int) = this.synchronized {
     updateStateTo(Release)
-    System.out.println(state)
   }
 
-  def updateStateTo(stateIn: State) = {
+  def updateStateTo(stateIn: State) = this.synchronized {
     tFromLastState = 0d
     state = stateIn
   }
 
-  def updateState() = {
+  def updateState() = this.synchronized {
     if (state == Attack && tFromLastState > attack)
       updateStateTo(Decay)
     else if (state == Decay && tFromLastState > decay)
