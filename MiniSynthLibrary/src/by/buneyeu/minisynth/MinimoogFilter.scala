@@ -2,7 +2,7 @@ package by.buneyeu.minisynth
 
 import scala.math._
 
-class MinimoogFilter(sampleRate: Int, var cutOff: Double, var res: Double) extends SampleRateDevice(sampleRate) with SampleProcessor {
+class MinimoogFilter(sampleRate: Int, private var cutOff: Double, private var _res: Double) extends SampleRateDevice(sampleRate) with SampleProcessor {
   val Tag = getClass.getSimpleName
 
   val nyquist = sampleRate / 2
@@ -13,7 +13,10 @@ class MinimoogFilter(sampleRate: Int, var cutOff: Double, var res: Double) exten
   var oldx = 0d
 
   def setCutOff = cutOff = _: Hz
-  def setRes = res = _: Double
+  def setRes(res: Double) = {
+    require(res < 0 || res > 1, "Res should be in range [0..1]")
+    _res = _: Double
+  }
   
   //TODO optimize defs to vars
   private def f = 2 * cutOff  / sampleRate //[0 - 1]
@@ -22,7 +25,7 @@ class MinimoogFilter(sampleRate: Int, var cutOff: Double, var res: Double) exten
   
   private def t = (1.f - p) * 1.386249f
   private def t2 = 12.f + t * t
-  private def r = res * (t2 + 6.f * t) / (t2 - 6.f * t)
+  private def r = _res * (t2 + 6.f * t) / (t2 - 6.f * t)
 
   
   override def processSample(input: Double) : Double = {
