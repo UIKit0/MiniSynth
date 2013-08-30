@@ -23,4 +23,14 @@ abstract class SampleRateDevice(sampleRate: Int) {
   type HzPerMs = Double
   
   val MsInSec = 1000d
+  
+  def level(level1: Double, level2: Double, currentT: Ms, periodT: Ms): Double = {
+    if (currentT > periodT)
+      level2
+    else {
+      val s = level2 - level1
+      val v = s / periodT
+      level1 + v * currentT
+    }
+  }
 }

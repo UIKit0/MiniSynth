@@ -64,16 +64,6 @@ class LoudnessContour(sampleRate: Int) extends SampleRateDevice(sampleRate) with
     sample * lastLoudness
   }
 
-  def level(level1: Double, level2: Double, currentT: Ms, periodT: Ms): Double = {
-    if (currentT > periodT)
-      level2
-    else {
-      val s = level2 - level1
-      val v = s / periodT
-      level1 + v * currentT
-    }
-  }
-
   def updateLoudness =
     state match {
       case Attack => level(0, 1, tFromLastState, attack)
