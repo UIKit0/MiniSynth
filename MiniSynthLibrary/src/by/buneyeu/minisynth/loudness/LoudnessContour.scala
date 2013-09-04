@@ -9,7 +9,6 @@ object LoudnessContour {
 }
 
 class LoudnessContour(sampleRate: Int) extends ADSR(sampleRate) with SampleProcessor {
-  import State._
 
   override def processSample(sample: Double): Double = {
     val loudness = update();
