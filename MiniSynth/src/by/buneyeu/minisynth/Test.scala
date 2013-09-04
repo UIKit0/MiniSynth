@@ -8,7 +8,7 @@ import scala.collection.mutable.ListBuffer
 import by.buneyeu.minisynth.oscillators.MutableFrequency
 import by.buneyeu.minisynth.loudness.LoudnessContour
 import by.buneyeu.minisynth.oscillators.Oscillator
-import by.buneyeu.minisynth.loudness.State._
+import by.buneyeu.minisynth.loudness.ADSR.State._
 
 object Test {
   

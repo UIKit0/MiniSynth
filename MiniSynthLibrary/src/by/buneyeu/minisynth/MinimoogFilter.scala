@@ -1,6 +1,7 @@
 package by.buneyeu.minisynth
 
 import scala.math._
+import by.buneyeu.minisynth.loudness.ADSR
 
 class MinimoogFilter(sampleRate: Int, private var _cutOff: Double, private var _res: Double) extends SampleRateDevice(sampleRate) with SampleProcessor {
   val Tag = getClass.getSimpleName
@@ -10,8 +11,19 @@ class MinimoogFilter(sampleRate: Int, private var _cutOff: Double, private var _
   val y = Array[Double](0, 0, 0, 0)
   val oldy = Array[Double](0, 0, 0)
 
+  val adsr = new ADSR(sampleRate)
+
+  //TODO separate reset method to setters
+  def reset = adsr.reset(_: Ms, _: Ms, _: Double)
+  
   var oldx = 0d
 
+  def nextCutOff(): Double = {
+    val level = adsr.update()
+//    level * _cutOff
+    _cutOff
+  }
+  
   def cutOff_= (value: Double) = {
     _cutOff = value
   }
@@ -21,18 +33,16 @@ class MinimoogFilter(sampleRate: Int, private var _cutOff: Double, private var _
     _res = value
   } 
 
-  
-  //TODO optimize defs to vars
-  private def f = 2 * _cutOff  / sampleRate //[0 - 1]
-  private def p = f * (1.8f - 0.8f * f)
-  private def k = p + p - 1.f
-  
-  private def t = (1.f - p) * 1.386249f
-  private def t2 = 12.f + t * t
-  private def r = _res * (t2 + 6.f * t) / (t2 - 6.f * t)
-
-  
   override def processSample(input: Double) : Double = {
+    val actualCutOff = nextCutOff()
+    val f = 2 * actualCutOff / sampleRate //[0 - 1]
+    val p = f * (1.8f - 0.8f * f)
+    val k = p + p - 1.f
+
+    val t = (1.f - p) * 1.386249f
+    val t2 = 12.f + t * t
+    val r = _res * (t2 + 6.f * t) / (t2 - 6.f * t)
+  
     // process input
     val x = input - r * y(3)
 

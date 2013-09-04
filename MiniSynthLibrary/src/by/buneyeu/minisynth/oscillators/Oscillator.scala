@@ -9,13 +9,31 @@ import by.buneyeu.minisynth.SampleProcessor
 class Oscillator(sampleRate: Int) extends SampleRateDevice(sampleRate) with SampleProcessor {
   val Tag = getClass.getSimpleName
 
+  object Waveform extends Enumeration {
+    type State = Value
+    val Triangle, AscendingSawtooth, DescendingSawtooth, SawtoothTriangle, Square, WideRectangular, NarrowRectangular = Value
+  }
+
+  import Waveform._
+  
+  var waveform = Triangle
+  
   val mFrequency: MutableFrequency = new MutableFrequency(sampleRate)
   var mRads: Double = 0
 
   def processSample(sample: Double) : Double = processSample
-  
-  def processSample() : Double = {
-    doSaw
+
+  def processSample(): Double = {
+    doWave(
+      waveform match {
+        case Triangle => triangle
+        case AscendingSawtooth => ascendingSawtooth
+        case DescendingSawtooth => descendingSawtooth
+        case SawtoothTriangle => sawtoothTriangle
+        case Square => square
+        case WideRectangular => wideRectangular
+        case NarrowRectangular => narrowRectangular
+      })
   }
 
   private def doWave(f: Double => Double): Double = {
@@ -31,8 +49,6 @@ class Oscillator(sampleRate: Int) extends SampleRateDevice(sampleRate) with Samp
   def resetPhase() = mRads = 0
   
   var synchronizedOscillator : Option[Oscillator] = None
-  
-  private def doSaw() = doWave(triangle)
 
   def setPitch(pitch: Double) = mFrequency.setPitch(_)
   def setFreq = mFrequency.setFinalValue(_: Hz) 

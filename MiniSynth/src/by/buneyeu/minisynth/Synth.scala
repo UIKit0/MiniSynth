@@ -17,9 +17,10 @@ import by.buneyeu.minisynth.oscillators.Oscillator
 class Synth(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListener {
 
   val oscillator = new Oscillator(sampleRate)
-  oscillator.setGlide(50)
+//  oscillator.setGlide(50)
   
   val minimoogFilter = new MinimoogFilter(sampleRate, 440, 0.3)
+  minimoogFilter.reset(200, 100, 7)
   
   val loudnessCountur = new LoudnessContour(sampleRate)
   loudnessCountur.reset(200, 100, 7)
@@ -83,7 +84,7 @@ class Synth(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListe
       val freqHz = SampleRateDevice.NoteToFreq(mNote)
       oscillator.setFreq(freqHz)
 
-      val processedSamples = samples map oscillator.processSample map loudnessCountur.processSample map minimoogFilter.processSample
+      val processedSamples = samples map oscillator.processSample// map loudnessCountur.processSample// map minimoogFilter.processSample
      
       //      if (t <= maxt) {
       //      printSamples(writer, processedSamples, t)

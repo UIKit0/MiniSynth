@@ -3,14 +3,18 @@ package by.buneyeu.minisynth.loudness
 import by.buneyeu.minisynth.NoteListener
 import by.buneyeu.minisynth.SampleRateDevice
 
-object State extends Enumeration {
-	type State = Value
-	val Attack, Decay, Sustain, Release = Value
+object ADSR {
+  object State extends Enumeration {
+    type State = Value
+    val Attack, Decay, Sustain, Release = Value
+  }
+
 }
 
 class ADSR(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListener {
-
-  import State._
+	ADSR
+	
+	import ADSR.State._
     
   var state = Attack
   
@@ -22,6 +26,7 @@ class ADSR(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListen
   
   val MaxSustain = 10d
   
+  //TODO separate reset method to setters
   def reset(attackIn: Ms, decayIn: Ms, sustainIn: Double /* 0-10 */ ) = {
     attack = attackIn
     decay = decayIn
@@ -44,7 +49,7 @@ class ADSR(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListen
     state = stateIn
   }
 
-  def updateState() = ADSR.this.synchronized {
+  private def updateState() = ADSR.this.synchronized {
     if (state == Attack && tFromLastState > attack)
       updateStateTo(Decay)
     else if (state == Decay && tFromLastState > decay)
@@ -58,7 +63,7 @@ class ADSR(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListen
     lastLevel
   }
   
-  def updateLoudness =
+  private def updateLoudness =
     state match {
       case Attack => level(0, 1, tFromLastState, attack)
       case Decay => level(1, normalizedSustain, tFromLastState, decay)
