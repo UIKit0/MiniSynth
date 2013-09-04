@@ -12,9 +12,9 @@ object ADSR {
 }
 
 class ADSR(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListener {
-	ADSR
-	
-	import ADSR.State._
+  ADSR
+
+  import ADSR.State._
     
   var state = Attack
   
