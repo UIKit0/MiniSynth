@@ -6,7 +6,7 @@ import scala.math.sin
 import by.buneyeu.minisynth.SampleRateDevice
 import by.buneyeu.minisynth.SampleProcessor
 
-class Oscillator(sampleRate: Int) extends SampleRateDevice(sampleRate) with SampleProcessor {
+object Oscillator {
   val Tag = getClass.getSimpleName
 
   object Waveform extends Enumeration {
@@ -14,12 +14,17 @@ class Oscillator(sampleRate: Int) extends SampleRateDevice(sampleRate) with Samp
     val Triangle, AscendingSawtooth, DescendingSawtooth, SawtoothTriangle, Square, WideRectangular, NarrowRectangular = Value
   }
 
-  import Waveform._
+}
+
+class Oscillator(sampleRate: Int) extends SampleRateDevice(sampleRate) with SampleProcessor {
+  Oscillator
+
+  import Oscillator.Waveform._
   
   var waveform = Triangle
   
-  val mFrequency: MutableFrequency = new MutableFrequency(sampleRate)
-  var mRads: Double = 0
+  private val mFrequency: MutableFrequency = new MutableFrequency(sampleRate)
+  private var mRads: Double = 0
 
   def processSample(sample: Double) : Double = processSample
 
@@ -72,7 +77,7 @@ class Oscillator(sampleRate: Int) extends SampleRateDevice(sampleRate) with Samp
     if (phase <= Pi) {
       level(1 - sawtoothLevel * 2, -1, phase, Pi)
     } else {
-      level(-1, 1, phase, Pi)
+      level(-1, 1, phase - Pi, Pi)
     }
   }
   
