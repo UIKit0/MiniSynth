@@ -6,18 +6,21 @@ import javax.sound.sampled.DataLine
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.LineUnavailableException
 import java.nio.ByteBuffer
-import by.buneyeu.minisynth.loudness.LoudnessContour
 import java.nio.file.Files
 import java.nio.file.FileSystems
 import java.nio.file.StandardOpenOption
 import java.nio.charset.Charset
 import java.io.BufferedWriter
 import by.buneyeu.minisynth.oscillators.Oscillator
+import by.buneyeu.minisynth.loudness.LoudnessContour
 
 class Synth(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListener {
+ 
+  import Oscillator.Waveform._
 
   val oscillator = new Oscillator(sampleRate)
 //  oscillator.setGlide(50)
+  oscillator.waveform = Triangle
   
   val minimoogFilter = new MinimoogFilter(sampleRate, 440, 0.3)
   minimoogFilter.reset(200, 100, 7)

@@ -6,12 +6,10 @@ import java.nio.charset.Charset
 import java.nio.file.StandardOpenOption
 import scala.collection.mutable.ListBuffer
 import by.buneyeu.minisynth.oscillators.MutableFrequency
-import by.buneyeu.minisynth.loudness.LoudnessContour
 import by.buneyeu.minisynth.oscillators.Oscillator
-import by.buneyeu.minisynth.loudness.ADSR.State._
+import by.buneyeu.minisynth.loudness.LoudnessContour
 
 object Test {
-  
 
   type Ms = Double
   type Hz = Double
@@ -63,10 +61,11 @@ object Test {
     Files.write(path, builder.toString.getBytes, StandardOpenOption.CREATE)
   }
 
-  def plotOscillator(sampleRate: Int, freq: Hz, plotTime: Ms) {
+  private def plotOscillator(sampleRate: Int, freq: Hz, plotTime: Ms, waveform: Oscillator.Waveform.Value) = {
     val osc = new Oscillator(sampleRate)
     osc.setGlide(0)
     osc.setFreq(freq) //TODO
+    osc.waveform = waveform
 
     val length = (sampleRate * plotTime / MsInSec).toInt
     val valuesToPlot: Array[(Double, Double)] = new Array[(Double, Double)](length)
@@ -76,7 +75,12 @@ object Test {
       val value = osc.processSample
     ) valuesToPlot(i) = (ms, value)
 
-    plot("oscillator.txt", valuesToPlot)
+    plot("plots/" + waveform.toString() + ".txt", valuesToPlot)
+  }
+  
+  def plotOscillator(sampleRate: Int, freq: Hz, plotTime: Ms) {
+    Oscillator.Waveform.values.foreach(plotOscillator(sampleRate, freq, plotTime, _))
+
   }
 
   def plotLoudness(attack: Ms, decay: Ms, normalizedSustain: Double) {
