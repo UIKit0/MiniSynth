@@ -93,7 +93,9 @@ object Test {
     val valuesToPlot = new Array[(Double, Double)](steps)
 
     val countour = new LoudnessContour(sampleRate)
-    countour.reset(100, 100, 7)
+    countour.attack = 100
+    countour.decay = 100
+    countour.sustain = 7
 
     def thread[F](f: => F) = (new Thread(new Runnable() { def run() { f } })).start
 

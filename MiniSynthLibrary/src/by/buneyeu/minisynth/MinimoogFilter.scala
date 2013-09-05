@@ -4,24 +4,32 @@ import scala.math._
 import by.buneyeu.minisynth.loudness.ADSR
 
 class MinimoogFilter(sampleRate: Int, private var _cutOff: Double, private var _res: Double) extends SampleRateDevice(sampleRate) with SampleProcessor {
-  val Tag = getClass.getSimpleName
-
+  import SampleRateDevice._
+  
   val nyquist = sampleRate / 2
 
   val y = Array[Double](0, 0, 0, 0)
   val oldy = Array[Double](0, 0, 0)
 
-  val adsr = new ADSR(sampleRate)
+  private val adsr = new ADSR(sampleRate)
 
-  //TODO separate reset method to setters
-  def reset = adsr.reset(_: Ms, _: Ms, _: Double)
+  /**
+   * @param value should be between 0 and 10 like in original minimoog
+   */
+  def sustain_=(value: Double) = adsr.sustain = value
+  def sustain = adsr.sustain
+  
+  def decay_=(value: Ms) = adsr.decay = value 
+  def decay = adsr.decay
+  
+  def attack_=(value: Ms) = adsr.attack = value
+  def attack = adsr.attack
   
   var oldx = 0d
 
   def nextCutOff(): Double = {
     val level = adsr.update()
-//    level * _cutOff
-    _cutOff
+    level * _cutOff
   }
   
   def cutOff_= (value: Double) = {

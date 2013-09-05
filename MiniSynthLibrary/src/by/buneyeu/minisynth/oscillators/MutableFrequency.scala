@@ -2,11 +2,9 @@ package by.buneyeu.minisynth.oscillators
 
 import scala.math
 import by.buneyeu.minisynth.SampleRateDevice
+import by.buneyeu.minisynth.SampleRateDevice._
 
 class MutableFrequency(sampleRate: Int) extends SampleRateDevice(sampleRate) {
-  val Tag = getClass.getSimpleName
-
-  
   var mStep : Int = 0
   var mFinalValue : Hz = 0
   var mNumSteps : Int = 0

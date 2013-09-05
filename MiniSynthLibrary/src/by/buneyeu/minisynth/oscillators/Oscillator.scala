@@ -4,6 +4,7 @@ import scala.math
 import scala.math.Pi
 import scala.math.sin
 import by.buneyeu.minisynth.SampleRateDevice
+import by.buneyeu.minisynth.SampleRateDevice._
 import by.buneyeu.minisynth.SampleProcessor
 
 object Oscillator {

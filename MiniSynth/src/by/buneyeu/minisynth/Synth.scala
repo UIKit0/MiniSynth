@@ -13,6 +13,7 @@ import java.nio.charset.Charset
 import java.io.BufferedWriter
 import by.buneyeu.minisynth.oscillators.Oscillator
 import by.buneyeu.minisynth.loudness.LoudnessContour
+import by.buneyeu.minisynth.SampleRateDevice._
 
 class Synth(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListener {
  
@@ -23,10 +24,14 @@ class Synth(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListe
   oscillator.waveform = Triangle
   
   val minimoogFilter = new MinimoogFilter(sampleRate, 440, 0.3)
-  minimoogFilter.reset(200, 100, 7)
+  minimoogFilter.attack = 200
+  minimoogFilter.decay = 100
+  minimoogFilter.sustain = 7
   
   val loudnessCountur = new LoudnessContour(sampleRate)
-  loudnessCountur.reset(200, 100, 7)
+  loudnessCountur.attack = 200
+  loudnessCountur.decay = 100
+  loudnessCountur.sustain = 7
   
   var mSoundThread: Thread = null
   var mNote = 1

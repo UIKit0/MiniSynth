@@ -2,6 +2,8 @@ package by.buneyeu.minisynth
 
 object SampleRateDevice {
   type Ms = Double
+  type Hz = Double
+  type HzPerMs = Double
   
   val CFreq = 32.703196
   val Semitone = 1.05946309436
@@ -15,13 +17,10 @@ object SampleRateDevice {
 
 abstract class SampleRateDevice(sampleRate: Int) {
   SampleRateDevice
-
+  import SampleRateDevice._
+  
   val NumSamples = sampleRate / 8 /* 1/8 second buffer */
 
-  type Ms = Double
-  type Hz = Double
-  type HzPerMs = Double
-  
   val MsInSec = 1000d
   
   def level(level1: Double, level2: Double, currentT: Ms, periodT: Ms): Double = {

@@ -2,6 +2,7 @@ package by.buneyeu.minisynth.loudness
 
 import by.buneyeu.minisynth.NoteListener
 import by.buneyeu.minisynth.SampleRateDevice
+import by.buneyeu.minisynth.SampleRateDevice._
 
 object ADSR {
   object State extends Enumeration {
@@ -13,27 +14,32 @@ object ADSR {
 
 class ADSR(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListener {
   ADSR
-
+  
   import ADSR.State._
-    
-  var state = Attack
+  
+  private var state = Attack
   
   var attack: Ms = 0
   var decay: Ms = 0
-  var normalizedSustain : Double = 0
+  private var normalizedSustain : Double = 1
 
-  var tFromLastState = 0d
-  
-  val MaxSustain = 10d
-  
-  //TODO separate reset method to setters
-  def reset(attackIn: Ms, decayIn: Ms, sustainIn: Double /* 0-10 */ ) = {
-    attack = attackIn
-    decay = decayIn
-    normalizedSustain = sustainIn / MaxSustain
+  private var _sustain = 1d
+
+  /**
+   * @param value should be between 0 and 10 like in original minimoog
+   */
+  def sustain_=(value: Double): Unit = {
+    require(value >= 0 && value <= 10, "Sustain should be in range between 0 and 10!")
+    normalizedSustain = value / MaxSustain
   }
-
-  var lastLevel = 0d
+  
+  def sustain = normalizedSustain * MaxSustain
+  
+  private var tFromLastState = 0d
+  
+  private val MaxSustain = 10d
+  
+  private var lastLevel = 0d
 
   def noteOn(note: Int) = ADSR.this.synchronized {
     updateStateTo(Attack)
