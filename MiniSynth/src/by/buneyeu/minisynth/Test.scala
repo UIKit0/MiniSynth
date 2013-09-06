@@ -13,7 +13,8 @@ object Test {
 
   type Ms = Double
   type Hz = Double
-
+  private val MsInSec = 1000
+  
   def plotFreq(sampleRate: Int, glide: Ms, startValue: Hz, endValue: Hz, changeNoteAfter: Ms) {
     val afterEnd: Ms = 500
 
@@ -47,28 +48,37 @@ object Test {
 
   }
 
-  val MsInSec = 1000
+  def writeStringToFile(filename: String, stringToWrite: String) : Unit = {
+    val path = FileSystems.getDefault().getPath(".", filename);
+    Files.write(path, stringToWrite.getBytes, StandardOpenOption.CREATE)
+  }
+  
+  def plot(filename: String, values: Array[Double]) =
+    plot[Double](filename, values, (builder, value) => {
+      builder ++= value.toString ++= "\n"
+    })
 
-  def plot(filename: String, values: Array[(Double, Double)]) = {
-    val builder = new StringBuilder
-    values.foreach(tuple => {
+  def plot(filename: String, values: Array[(Ms, Double)]) =
+    plot[(Double, Double)](filename, values, (builder, tuple) => {
       val ms = tuple._1
       val value = tuple._2
-            builder ++= ms.toString ++= " " ++= value.toString ++= "\n"
-      //builder ++= value.toString ++= "\n"
+      builder ++= ms.toString ++= " " ++= value.toString ++= "\n"
     })
-    val path = FileSystems.getDefault().getPath(".", filename);
-    Files.write(path, builder.toString.getBytes, StandardOpenOption.CREATE)
+  
+  def plot[T](filename: String, values: Array[T], writeValueToBuilder: (StringBuilder, T) => Unit) : Unit = {
+    val builder = new StringBuilder
+    values.foreach(value => writeValueToBuilder(builder, value))
+    writeStringToFile(filename, builder.toString)
   }
 
-  private def plotOscillator(sampleRate: Int, freq: Hz, plotTime: Ms, waveform: Oscillator.Waveform.Value) = {
+  private def plotOscillatorWithTime(sampleRate: Int, freq: Hz, plotTime: Ms, waveform: Oscillator.Waveform.Value) = {
     val osc = new Oscillator(sampleRate)
     osc.setGlide(0)
     osc.setFreq(freq) //TODO
     osc.waveform = waveform
 
     val length = (sampleRate * plotTime / MsInSec).toInt
-    val valuesToPlot: Array[(Double, Double)] = new Array[(Double, Double)](length)
+    val valuesToPlot = new Array[(Ms, Double)](length)
     for (
       i <- 0 until length;
       val ms = i.toDouble * MsInSec / sampleRate;
@@ -77,12 +87,28 @@ object Test {
 
     plot("plots/" + waveform.toString() + ".txt", valuesToPlot)
   }
-  
-  def plotOscillator(sampleRate: Int, freq: Hz, plotTime: Ms) {
-    Oscillator.Waveform.values.foreach(plotOscillator(sampleRate, freq, plotTime, _))
 
+  private def plotOscillatorWithoutTime(sampleRate: Int, freq: Hz, plotTime: Ms, waveform: Oscillator.Waveform.Value) = {
+    val osc = new Oscillator(sampleRate)
+    osc.setGlide(0)
+    osc.setFreq(freq) //TODO
+    osc.waveform = waveform
+
+    val length = (sampleRate * plotTime / MsInSec).toInt
+    val valuesToPlot  = new Array[Double](length)
+    for (
+      i <- 0 until length
+    ) valuesToPlot(i) = osc.processSample
+
+    plot("plots/" + waveform.toString() + ".txt", valuesToPlot)
   }
 
+  def plotOscillatorsWithTime(sampleRate: Int, freq: Hz, plotTime: Ms) =
+    Oscillator.Waveform.values.foreach(plotOscillatorWithTime(sampleRate, freq, plotTime, _))
+
+  def plotOscillatorsWithoutTime(sampleRate: Int, freq: Hz, plotTime: Ms) =
+    Oscillator.Waveform.values.foreach(plotOscillatorWithoutTime(sampleRate, freq, plotTime, _))
+    
   def plotLoudness(attack: Ms, decay: Ms, normalizedSustain: Double) {
     val sampleRate = 44100
     val inc: Ms = MsInSec.toDouble / sampleRate
@@ -96,8 +122,6 @@ object Test {
     countour.attack = 100
     countour.decay = 100
     countour.sustain = 7
-
-    def thread[F](f: => F) = (new Thread(new Runnable() { def run() { f } })).start
 
     countour.noteOn(1)
     for (

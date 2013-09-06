@@ -22,7 +22,7 @@ public class Main {
 		
 //		LoudnessContour.getLoudnessPlot(100, 100, 0.7, 0, 300);
 //		Test.plotFreq(44100, 200, 440, 600, 200);
-//		Test.plotOscillator(44100, 440, 10);
+		Test.plotOscillatorsWithoutTime(44100, 440, 10);
 //		Test.plotLoudness(100, 100, 0.7);
 	}
 }
