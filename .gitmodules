@@ -1,0 +1,6 @@
+[submodule "lib/breeze"]
+	path = lib/breeze
+	url = https://github.com/dlwh/breeze.git
+[submodule ".\\MiniSynthLibrary/lib/breeze"]
+	path = .\\MiniSynthLibrary/lib/breeze
+	url = https://github.com/dlwh/breeze.git
