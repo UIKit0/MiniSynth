@@ -5,8 +5,6 @@ import by.buneyeu.minisynth.loudness.ADSR
 
 class MinimoogFilter(sampleRate: Int, private var _cutOff: Double, private var _res: Double) extends SampleRateDevice(sampleRate) with SampleProcessor {
   import SampleRateDevice._
-  
-  val nyquist = sampleRate / 2
 
   val y = Array[Double](0, 0, 0, 0)
   val oldy = Array[Double](0, 0, 0)
