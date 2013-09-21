@@ -24,8 +24,8 @@ object Test {
     var currentMs = 0d
 
     val freq = new MutableFrequency(sampleRate)
-    freq.setGlide(glide)
-    freq.setFinalValue(endValue)
+    freq.glide = glide
+    freq.finalValue = endValue
 
     val freqs = new ListBuffer[Double]
     var set = false
@@ -73,8 +73,8 @@ object Test {
 
   private def plotOscillatorWithTime(sampleRate: Int, freq: Hz, plotTime: Ms, waveform: Oscillator.Waveform.Value) = {
     val osc = new Oscillator(sampleRate)
-    osc.setGlide(0)
-    osc.setFreq(freq) //TODO
+    osc.glide = 0
+    osc.freq = freq //TODO
     osc.waveform = waveform
 
     val length = (sampleRate * plotTime / MsInSec).toInt
@@ -90,8 +90,8 @@ object Test {
 
   private def plotOscillatorWithoutTime(sampleRate: Int, freq: Hz, plotTime: Ms, waveform: Oscillator.Waveform.Value) = {
     val osc = new Oscillator(sampleRate)
-    osc.setGlide(0)
-    osc.setFreq(freq) //TODO
+    osc.glide = 0
+    osc.freq = freq //TODO
     osc.waveform = waveform
 
     val length = (sampleRate * plotTime / MsInSec).toInt
