@@ -20,7 +20,7 @@ abstract class SampleRateDevice(sampleRate: Int) {
   SampleRateDevice
   import SampleRateDevice._
   
-  val NumSamples = sampleRate / 8 /* 1/8 second buffer */
+  val NumSamples = sampleRate / 32 /* 1/32 second buffer */
 
   val MsInSec = 1000d
   
