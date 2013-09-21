@@ -4,6 +4,7 @@ object SampleRateDevice {
   type Ms = Double
   type Hz = Double
   type HzPerMs = Double
+  type Semitones = Double
   
   val CFreq = 32.703196
   val Semitone = 1.05946309436

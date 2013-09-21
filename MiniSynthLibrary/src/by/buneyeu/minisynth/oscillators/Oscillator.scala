@@ -6,6 +6,7 @@ import scala.math.sin
 import by.buneyeu.minisynth.SampleRateDevice
 import by.buneyeu.minisynth.SampleRateDevice._
 import by.buneyeu.minisynth.SampleProcessor
+import by.buneyeu.minisynth.SampleGenerator
 
 object Oscillator {
   val Tag = getClass.getSimpleName
@@ -17,7 +18,7 @@ object Oscillator {
 
 }
 
-class Oscillator(sampleRate: Int) extends SampleRateDevice(sampleRate) with SampleProcessor {
+class Oscillator(sampleRate: Int) extends SampleRateDevice(sampleRate) with SampleGenerator {
   Oscillator
 
   import Oscillator.Waveform._
@@ -27,8 +28,7 @@ class Oscillator(sampleRate: Int) extends SampleRateDevice(sampleRate) with Samp
   private val mFrequency: MutableFrequency = new MutableFrequency(sampleRate)
   private var mRads: Double = 0
 
-  def processSample(sample: Double) : Double = processSample
-
+  @Override
   def processSample(): Double = {
     doWave(
       waveform match {
@@ -56,9 +56,14 @@ class Oscillator(sampleRate: Int) extends SampleRateDevice(sampleRate) with Samp
   
   var synchronizedOscillator : Option[Oscillator] = None
 
-  def setPitch(pitch: Double) = mFrequency.setPitch(_)
-  def setFreq = mFrequency.setFinalValue(_: Hz) 
-  def setGlide = mFrequency.setGlide(_: Int)
+  def pitch_=(pitch: Semitones) = mFrequency.pitch = pitch
+  def pitch = mFrequency.pitch
+
+  def freq_= (freq: Hz) = mFrequency.finalValue = freq
+  def freq = mFrequency.finalValue
+  
+  def glide_= (glide: Ms) = mFrequency.glide = glide
+  def glide = mFrequency.glide
 
   def triangle(phase: Double): Double = sawtoothTriangle(phase, 0)
 

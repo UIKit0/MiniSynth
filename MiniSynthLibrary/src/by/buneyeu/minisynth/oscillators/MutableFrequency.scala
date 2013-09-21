@@ -12,13 +12,13 @@ class MutableFrequency(sampleRate: Int) extends SampleRateDevice(sampleRate) {
   var mStartValue : Hz = 0
   var mInc : Hz = 0
   
-  type Semitones = Double 
   var mPitch : Semitones = 0
   var mPitchMultiplicator: Double = 1
   
-  def setGlide(glide: Ms) = mGlide = glide
+  def glide_=(glide: Ms) = mGlide = glide
+  def glide = mGlide
   
-  def setFinalValue(freq: Hz) = {
+  def finalValue_=(freq: Hz) = {
     mStartValue = getValue
     mFinalValue = freq
     val ms = MsInSec / sampleRate
@@ -26,12 +26,14 @@ class MutableFrequency(sampleRate: Int) extends SampleRateDevice(sampleRate) {
     mInc = if (mGlide > 0) (mFinalValue - mStartValue) / mNumSteps else 0
     mStep = 0
   }
+  def finalValue = mFinalValue
   
-  def setPitch(pitch: Double) = {
+  def pitch_=(pitch: Semitones) = {
     mPitch = pitch
     mPitchMultiplicator = math.pow(SampleRateDevice.Semitone, mPitch)
   }
-
+  def pitch = mPitch
+  
   def getValue: Hz = {
     val standardValue = if (mGlide > 0) mStartValue + mInc * mStep else mFinalValue
     val pitchedValue = standardValue * mPitchMultiplicator
