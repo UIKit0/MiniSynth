@@ -90,9 +90,9 @@ class Synth(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListe
     var maxt = 1000
     while (!m_stop && !Thread.currentThread.isInterrupted()) {
       val freqHz = SampleRateDevice.NoteToFreq(mNote)
-      oscillator.setFreq(freqHz)
+      oscillator.freq = freqHz
 
-      val processedSamples = samples map oscillator.processSample// map loudnessCountur.processSample// map minimoogFilter.processSample
+      val processedSamples = samples //map oscillator.processSample// map loudnessCountur.processSample// map minimoogFilter.processSample
      
       //      if (t <= maxt) {
       //      printSamples(writer, processedSamples, t)

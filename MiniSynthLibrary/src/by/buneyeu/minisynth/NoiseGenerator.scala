@@ -1,13 +1,14 @@
 package by.buneyeu.minisynth
 
 import scala.util.Random
+import by.buneyeu.minisynth.NoiseType
 
 object NoiseType extends Enumeration {
   type NoiseType = Value
   val White, Pink = Value
 }
 
-class NoiseGenerator(noiseType: NoiseType.NoiseType) extends SampleProcessor {
+class NoiseGenerator(noiseType: NoiseType.Value) extends SampleGenerator {
   import NoiseType._
 
   class SimpleLPF extends SampleProcessor {
@@ -22,6 +23,7 @@ class NoiseGenerator(noiseType: NoiseType.NoiseType) extends SampleProcessor {
   }
   val lpf = new SimpleLPF
 
+  @Override
   def processSample(): Double = {
     val value = Random.nextDouble * 2 - 1
     if (noiseType == White) {
@@ -31,5 +33,4 @@ class NoiseGenerator(noiseType: NoiseType.NoiseType) extends SampleProcessor {
     }
   }
 
-  def processSample(sample: Double) = processSample
 }

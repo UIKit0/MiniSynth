@@ -7,6 +7,9 @@ import by.buneyeu.minisynth.SampleRateDevice
 import by.buneyeu.minisynth.SampleRateDevice._
 import by.buneyeu.minisynth.SampleProcessor
 import by.buneyeu.minisynth.SampleGenerator
+import by.buneyeu.minisynth.VolumedSampleProcessor
+import by.buneyeu.minisynth.VolumedSampleProcessor
+import by.buneyeu.minisynth.VolumedSampleProcessor
 
 object Oscillator {
   val Tag = getClass.getSimpleName
@@ -18,6 +21,8 @@ object Oscillator {
 
 }
 
+class VolumedOscillator(sampleRate: Int) extends Oscillator(sampleRate) with VolumedSampleProcessor
+
 class Oscillator(sampleRate: Int) extends SampleRateDevice(sampleRate) with SampleGenerator {
   Oscillator
 
@@ -28,8 +33,7 @@ class Oscillator(sampleRate: Int) extends SampleRateDevice(sampleRate) with Samp
   private val mFrequency: MutableFrequency = new MutableFrequency(sampleRate)
   private var mRads: Double = 0
 
-  @Override
-  def processSample(): Double = {
+  override def processSample(): Double = {
     doWave(
       waveform match {
         case Triangle => triangle
@@ -43,17 +47,23 @@ class Oscillator(sampleRate: Int) extends SampleRateDevice(sampleRate) with Samp
   }
 
   private def doWave(f: Double => Double): Double = {
-    mRads += 2 * Pi * mFrequency.nextValue() / sampleRate
+    if (!reset)
+      mRads += 2 * Pi * mFrequency.nextValue() / sampleRate
+    else reset = false
     val newRads = mRads % (2 * Pi)
-    if (newRads != mRads && synchronizedOscillator.isDefined) {
-      synchronizedOscillator.get.mRads = newRads
-    } 
+    synchronized {
+      if (newRads != mRads && synchronizedOscillator.isDefined) {
+//        System.out.println("new rads =" + newRads + ", old = " + mRads);
+        //todo make sync by synchorzniaOscillator cause it's another thjread
+        synchronizedOscillator.get.mRads = newRads
+        synchronizedOscillator.get.reset = true
+      }
+    }
     mRads = newRads
     f(mRads)
   }
   
-  def resetPhase() = mRads = 0
-  
+  var reset = false
   var synchronizedOscillator : Option[Oscillator] = None
 
   def pitch_=(pitch: Semitones) = mFrequency.pitch = pitch
