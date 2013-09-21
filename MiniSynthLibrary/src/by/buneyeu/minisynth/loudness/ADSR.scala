@@ -29,7 +29,7 @@ class ADSR(sampleRate: Int) extends SampleRateDevice(sampleRate) with NoteListen
    * @param value should be between 0 and 10 like in original minimoog
    */
   def sustain_=(value: Double): Unit = {
-    require(value >= 0 && value <= 10, "Sustain should be in range between 0 and 10!")
+    require(value >= 0 && value <= MaxSustain, "Sustain should be in range between 0 and " + MaxSustain + "!")
     normalizedSustain = value / MaxSustain
   }
   
